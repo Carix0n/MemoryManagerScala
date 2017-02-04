@@ -2,4 +2,5 @@
 /target
 /project
 *.sbt
-**.DS_Store
+*.iml
+*.DS_Store
