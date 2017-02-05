@@ -1,15 +1,13 @@
 package memorymanager
 
 import scala.math.{max, min}
-import scala.math.Ordered.orderingToOrdered
 
 object MemorySegment {
   def heapObserver(segment: MemorySegment, newIndex: Int): Unit = {
     segment.heapIndex = newIndex
   }
 
-  implicit def ordering: Ordering[MemorySegment] =
-    (lhs: MemorySegment, rhs: MemorySegment) => (lhs.size, -lhs.left) compare (rhs.size, -rhs.left)
+  implicit def memorySegmentSizeCompare: Ordering[MemorySegment] = Ordering.by(x => (x.size, -x.left))
 }
 
 class MemorySegment(var left: Int, var right: Int) {
