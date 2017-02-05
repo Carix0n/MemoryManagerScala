@@ -1,6 +1,7 @@
 **/.idea
 /target
 /project
+/out
 *.sbt
 *.iml
 *.DS_Store

@@ -35,11 +35,12 @@ object MemoryManager {
 
 class MemoryManager(memorySize: Int) {
   def allocate(size: Int): MemorySegment = {
-    if (_freeMemorySegments.isEmpty || _freeMemorySegments.top.size < size) MemoryManager.undefinedHandle
+    if (_freeMemorySegments.isEmpty || _freeMemorySegments.top.size < size) undefinedHandle
     else {
-      val newSegment = new MemorySegment(_freeMemorySegments.top.left, _freeMemorySegments.top.left + size)
-      val availableSize = _freeMemorySegments.top.size
+      val newSegment = _freeMemorySegments.top
+      val availableSize = newSegment.size
       _freeMemorySegments.Pop()
+      newSegment.right = newSegment.left + size
 
       if (availableSize > size) {
         val extraSegment = new MemorySegment(newSegment.right, newSegment.right + availableSize - size)
@@ -52,7 +53,7 @@ class MemoryManager(memorySize: Int) {
   }
 
   def free(segment: MemorySegment): Unit = {
-    if (segment == MemoryManager.undefinedHandle) return
+    if (segment == undefinedHandle) return
 
     if (segment != _memorySegments.head) _appendIfFreePrevious(segment)
 
@@ -60,6 +61,8 @@ class MemoryManager(memorySize: Int) {
 
     _freeMemorySegments.Push(segment)
   }
+
+  private val undefinedHandle = MemoryManager.undefinedHandle
 
   private var _memorySegments = ListBuffer(new MemorySegment(0, memorySize))
 

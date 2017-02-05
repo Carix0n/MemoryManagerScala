@@ -12,7 +12,7 @@ object MemorySegment {
     (lhs: MemorySegment, rhs: MemorySegment) => (lhs.size, -lhs.left) compare (rhs.size, -rhs.left)
 }
 
-class MemorySegment(val left: Int, val right: Int) {
+class MemorySegment(var left: Int, var right: Int) {
   var heapIndex: Int = OrderedHeap.kNullIndex
 
   def size: Int = right - left

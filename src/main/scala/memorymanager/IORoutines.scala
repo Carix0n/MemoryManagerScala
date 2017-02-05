@@ -1,7 +1,10 @@
 package memorymanager
 
+import scala.io.Source
+
 object IORoutines {
-  private val _params = scala.io.Source.fromInputStream(System.in)
+  private val _params = Source
+    .fromInputStream(System.in)
     .getLines()
     .flatMap(_.split(" "))
     .map(_.toInt)
