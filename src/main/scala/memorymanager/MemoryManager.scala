@@ -12,7 +12,7 @@ object MemoryManager {
       case AllocationQuery(allocationSize) =>
         val handle = memoryManager.allocate(allocationSize)
         val response =
-          if (handle != undefinedHandle) makeSuccessfullAllocation(handle.left)
+          if (handle != undefinedHandle) makeSuccessfulAllocation(handle.left)
           else makeFailedAllocation()
 
         handles.append(handle)
@@ -26,7 +26,7 @@ object MemoryManager {
     responses.filter(_ != null)
   }
 
-  def makeSuccessfullAllocation(position: Int): MemoryManagerAllocationResponse =
+  def makeSuccessfulAllocation(position: Int): MemoryManagerAllocationResponse =
     MemoryManagerAllocationResponse(success = true, position)
 
   def makeFailedAllocation(): MemoryManagerAllocationResponse =
@@ -37,18 +37,16 @@ class MemoryManager(memorySize: Int) {
   def allocate(size: Int): MemorySegment = {
     if (_freeMemorySegments.isEmpty || _freeMemorySegments.top.size < size) undefinedHandle
     else {
-      val newSegment = _freeMemorySegments.top
-      val availableSize = newSegment.size
+      val allocatedSegment = _freeMemorySegments.top
       _freeMemorySegments.Pop()
-      newSegment.right = newSegment.left + size
+      val optExtraSegment = allocatedSegment.splitAt(size)
 
-      if (availableSize > size) {
-        val extraSegment = new MemorySegment(newSegment.right, newSegment.right + availableSize - size)
-        _freeMemorySegments.Push(extraSegment)
-        _memorySegments.insert(_memorySegments.indexWhere(_ == newSegment) + 1, extraSegment)
+      if (optExtraSegment.isDefined) {
+        _freeMemorySegments.Push(optExtraSegment.get)
+        _memorySegments.insert(_memorySegments.indexWhere(_ == allocatedSegment) + 1, optExtraSegment.get)
       }
 
-      newSegment
+      allocatedSegment
     }
   }
 
@@ -64,7 +62,7 @@ class MemoryManager(memorySize: Int) {
 
   private val undefinedHandle = MemoryManager.undefinedHandle
 
-  private var _memorySegments = ListBuffer(new MemorySegment(0, memorySize))
+  private val _memorySegments = ListBuffer(new MemorySegment(0, memorySize))
 
   private val _freeMemorySegments = {
     val segments = new OrderedHeap[MemorySegment](MemorySegment.heapObserver)
@@ -73,13 +71,13 @@ class MemoryManager(memorySize: Int) {
   }
 
   private def _appendIfFree(remainingIndex: Int, appendingIndex: Int): Unit = {
-    var remaining = _memorySegments.apply(remainingIndex)
+    val remaining = _memorySegments.apply(remainingIndex)
     val appending = _memorySegments.apply(appendingIndex)
 
     if (appending.heapIndex != OrderedHeap.kNullIndex) {
       _freeMemorySegments.Erase(appending.heapIndex)
       _memorySegments -= appending
-      remaining = remaining.Unite(appending)
+      remaining.unite(appending)
     }
   }
 

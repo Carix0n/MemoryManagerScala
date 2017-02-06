@@ -1,50 +1,53 @@
 package memorymanager
 
+import scala.collection.mutable.ArrayBuffer
+
 object OrderedHeap {
   val kNullIndex: Int = -1
 }
 
 class OrderedHeap[T](indexChangeObserver: (T, Int) => Unit = (_: T, _: Int) => null.asInstanceOf[Unit])
                     (implicit ordering: Ordering[T]) {
-  private var elements = scala.collection.immutable.Vector.empty[T]
+  private val _elements = ArrayBuffer.empty[T]
 
   private val kNullIndex = OrderedHeap.kNullIndex
 
   def Push(value: T): Int = {
-    elements :+= value
+    _elements += value
     val lastElementIndex = size - 1
     NotifyIndexChange(value, lastElementIndex)
     SiftUp(lastElementIndex)
   }
 
   def Erase(index: Int): Unit = {
-    if (index + 1 == size) {
-      NotifyIndexChange(elements.last, kNullIndex)
-      elements = elements.dropRight(1)
+    val lastElementIndex = size - 1
+
+    if (index == lastElementIndex) {
+      NotifyIndexChange(_elements.last, kNullIndex)
+      _elements.remove(lastElementIndex)
     }
     else {
-      val lastElementIndex = size - 1
       SwapElements(index, lastElementIndex)
-      NotifyIndexChange(elements.last, kNullIndex)
+      NotifyIndexChange(_elements.last, kNullIndex)
 
       if (CompareElements(lastElementIndex, index)) {
-        elements = elements.dropRight(1)
+        _elements.remove(lastElementIndex)
         SiftUp(index)
       }
       else {
-        elements = elements.dropRight(1)
+        _elements.remove(lastElementIndex)
         SiftDown(index)
       }
     }
   }
 
-  def top: T = elements.head
+  def top: T = _elements.head
 
   def Pop(): Unit = Erase(0)
 
-  def size: Int = elements.size
+  def size: Int = _elements.size
 
-  def isEmpty: Boolean = elements.isEmpty
+  def isEmpty: Boolean = _elements.isEmpty
 
   private def parent(index: Int): Int = {
     val potentialParentIndex = (index - 1) / 2
@@ -68,17 +71,17 @@ class OrderedHeap[T](indexChangeObserver: (T, Int) => Unit = (_: T, _: Int) => n
   }
 
   def CompareElements(lhsIndex: Int, rhsIndex: Int): Boolean =
-    ordering.compare(elements.apply(lhsIndex), elements.apply(rhsIndex)) == -1
+    ordering.compare(_elements.apply(lhsIndex), _elements.apply(rhsIndex)) == -1
 
   def NotifyIndexChange(value: T, newElementIndex: Int): Unit = indexChangeObserver(value, newElementIndex)
 
   def SwapElements(lhsIndex: Int, rhsIndex: Int): Unit = {
-    val (lhs, rhs) = (elements.apply(lhsIndex), elements.apply(rhsIndex))
+    val (lhs, rhs) = (_elements.apply(lhsIndex), _elements.apply(rhsIndex))
 
-    elements = elements.updated(lhsIndex, rhs)
-    elements = elements.updated(rhsIndex, lhs)
-    NotifyIndexChange(elements.apply(lhsIndex), lhsIndex)
-    NotifyIndexChange(elements.apply(rhsIndex), rhsIndex)
+    _elements.update(lhsIndex, rhs)
+    _elements.update(rhsIndex, lhs)
+    NotifyIndexChange(_elements.apply(lhsIndex), lhsIndex)
+    NotifyIndexChange(_elements.apply(rhsIndex), rhsIndex)
   }
 
   def SiftUp(index: Int): Int = {
