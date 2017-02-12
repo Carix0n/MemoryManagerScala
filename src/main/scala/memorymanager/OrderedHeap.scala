@@ -8,9 +8,7 @@ object OrderedHeap {
 
 class OrderedHeap[T](indexChangeObserver: (T, Int) => Unit = (_: T, _: Int) => null.asInstanceOf[Unit])
                     (implicit ordering: Ordering[T]) {
-  private val _elements = ArrayBuffer.empty[T]
-
-  private val kNullIndex = OrderedHeap.kNullIndex
+  val kNullIndex: Int = OrderedHeap.kNullIndex
 
   def Push(value: T): Int = {
     _elements += value
@@ -41,37 +39,8 @@ class OrderedHeap[T](indexChangeObserver: (T, Int) => Unit = (_: T, _: Int) => n
     }
   }
 
-  def top: T = _elements.head
-
-  def Pop(): Unit = Erase(0)
-
-  def size: Int = _elements.size
-
-  def isEmpty: Boolean = _elements.isEmpty
-
-  private def parent(index: Int): Int = {
-    val potentialParentIndex = (index - 1) / 2
-
-    if (potentialParentIndex >= 0) potentialParentIndex
-    else kNullIndex
-  }
-
-  private def leftSon(index: Int): Int = {
-    val potentialLeftSonIndex = 2 * index + 1
-
-    if (potentialLeftSonIndex < size) potentialLeftSonIndex
-    else kNullIndex
-  }
-
-  private def rightSon(index: Int): Int = {
-    val potentialRightSonIndex = 2 * index + 2
-
-    if (potentialRightSonIndex < size) potentialRightSonIndex
-    else kNullIndex
-  }
-
   def CompareElements(lhsIndex: Int, rhsIndex: Int): Boolean =
-    ordering.compare(_elements.apply(lhsIndex), _elements.apply(rhsIndex)) == -1
+    ordering.reverse.compare(_elements.apply(lhsIndex), _elements.apply(rhsIndex)) == -1
 
   def NotifyIndexChange(value: T, newElementIndex: Int): Unit = indexChangeObserver(value, newElementIndex)
 
@@ -107,5 +76,36 @@ class OrderedHeap[T](indexChangeObserver: (T, Int) => Unit = (_: T, _: Int) => n
       SwapElements(index, swappingElementIndex)
       SiftDown(swappingElementIndex)
     }
+  }
+
+  def top: T = _elements.head
+
+  def Pop(): Unit = Erase(0)
+
+  def size: Int = _elements.size
+
+  def isEmpty: Boolean = _elements.isEmpty
+
+  private val _elements = ArrayBuffer.empty[T]
+
+  private def parent(index: Int): Int = {
+    val potentialParentIndex = (index - 1) / 2
+
+    if (potentialParentIndex >= 0) potentialParentIndex
+    else kNullIndex
+  }
+
+  private def leftSon(index: Int): Int = {
+    val potentialLeftSonIndex = 2 * index + 1
+
+    if (potentialLeftSonIndex < size) potentialLeftSonIndex
+    else kNullIndex
+  }
+
+  private def rightSon(index: Int): Int = {
+    val potentialRightSonIndex = 2 * index + 2
+
+    if (potentialRightSonIndex < size) potentialRightSonIndex
+    else kNullIndex
   }
 }

@@ -60,7 +60,7 @@ class MemoryManager(memorySize: Int) {
     _freeMemorySegments.Push(segment)
   }
 
-  private val undefinedHandle = MemoryManager.undefinedHandle
+  val undefinedHandle: MemorySegment = MemoryManager.undefinedHandle
 
   private val _memorySegments = ListBuffer(new MemorySegment(0, memorySize))
 

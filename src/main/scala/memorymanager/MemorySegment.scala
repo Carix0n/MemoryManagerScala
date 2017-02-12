@@ -7,7 +7,7 @@ object MemorySegment {
     segment.heapIndex = newIndex
   }
 
-  implicit def memorySegmentSizeCompare: Ordering[MemorySegment] = Ordering.by(x => (x.size, -x.left))
+  implicit def memorySegmentSizeCompare: Ordering[MemorySegment] = Ordering.by(x => (-x.size, x.left))
 }
 
 class MemorySegment(var left: Int, var right: Int) {

@@ -4,7 +4,7 @@ import scala.io.Source
 
 object IORoutines {
 
-  private lazy val _params = Source
+  private val _params = Source
     .fromInputStream(System.in)
     .getLines()
     .flatMap(_.split(" "))
